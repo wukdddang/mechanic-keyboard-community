@@ -99,17 +99,54 @@ class ApiService {
 
   // 리뷰 관련
   static Future<List<Review>> getReviews({int page = 1, int limit = 10}) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/reviews?page=$page&limit=$limit'),
-      headers: _headers,
-    );
+    try {
+      print('🔄 리뷰 목록 요청: page=$page, limit=$limit');
+      
+      final response = await http.get(
+        Uri.parse('$baseUrl/reviews?page=$page&limit=$limit'),
+        headers: _headers,
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final List<dynamic> reviewsJson = data['reviews'];
-      return reviewsJson.map((json) => Review.fromJson(json)).toList();
-    } else {
-      throw Exception('리뷰 목록을 불러오는데 실패했습니다: ${response.body}');
+      print('📡 응답 상태코드: ${response.statusCode}');
+      print('📡 응답 본문: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print('📊 파싱된 데이터: $data');
+        
+        if (data['reviews'] == null) {
+          print('⚠️ reviews 필드가 null입니다');
+          return [];
+        }
+        
+        final List<dynamic> reviewsJson = data['reviews'];
+        print('📋 리뷰 개수: ${reviewsJson.length}');
+        
+        if (reviewsJson.isNotEmpty) {
+          print('📄 첫 번째 리뷰 샘플: ${reviewsJson[0]}');
+        }
+        
+        final reviews = <Review>[];
+        for (int i = 0; i < reviewsJson.length; i++) {
+          try {
+            final review = Review.fromJson(reviewsJson[i]);
+            reviews.add(review);
+            print('✅ 리뷰 ${i + 1} 파싱 성공');
+          } catch (e) {
+            print('❌ 리뷰 ${i + 1} 파싱 실패: $e');
+            print('❌ 문제있는 데이터: ${reviewsJson[i]}');
+            // 에러가 발생해도 계속 진행
+          }
+        }
+        
+        print('✅ 총 ${reviews.length}개 리뷰 파싱 완료');
+        return reviews;
+      } else {
+        throw Exception('리뷰 목록을 불러오는데 실패했습니다: ${response.body}');
+      }
+    } catch (e) {
+      print('❌ getReviews 에러: $e');
+      rethrow;
     }
   }
 

@@ -37,7 +37,7 @@ class ReviewCard extends StatelessWidget {
                     radius: 16,
                     backgroundColor: Theme.of(context).primaryColor,
                     child: Text(
-                      review.user.username[0].toUpperCase(),
+                      (review.user?.username ?? '익명')[0].toUpperCase(),
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -50,7 +50,7 @@ class ReviewCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          review.user.username,
+                          review.user?.username ?? '익명 사용자',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w500,
                           ),

@@ -13,7 +13,8 @@ class Review {
   final double feelRating;
   final double overallRating;
   final List<String> tags;
-  final User user;
+  final String userId;
+  final User? user;
   final List<ReviewMedia> media;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -31,33 +32,86 @@ class Review {
     required this.feelRating,
     required this.overallRating,
     required this.tags,
-    required this.user,
+    required this.userId,
+    this.user,
     required this.media,
     required this.createdAt,
     required this.updatedAt,
   });
 
   factory Review.fromJson(Map<String, dynamic> json) {
-    return Review(
-      id: json['id'],
-      title: json['title'],
-      content: json['content'],
-      keyboardFrame: json['keyboardFrame'],
-      switchType: json['switchType'],
-      keycapType: json['keycapType'],
-      deskPad: json['deskPad'],
-      deskType: json['deskType'],
-      soundRating: (json['soundRating'] as num).toDouble(),
-      feelRating: (json['feelRating'] as num).toDouble(),
-      overallRating: (json['overallRating'] as num).toDouble(),
-      tags: List<String>.from(json['tags'] ?? []),
-      user: User.fromJson(json['user']),
-      media: (json['media'] as List?)
-          ?.map((m) => ReviewMedia.fromJson(m))
-          .toList() ?? [],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
-    );
+    try {
+      return Review(
+        id: json['id']?.toString() ?? '',
+        title: json['title']?.toString() ?? '',
+        content: json['content']?.toString() ?? '',
+        keyboardFrame: json['keyboard_frame']?.toString() ?? json['keyboardFrame']?.toString() ?? '',
+        switchType: json['switch_type']?.toString() ?? json['switchType']?.toString() ?? '',
+        keycapType: json['keycap_type']?.toString() ?? json['keycapType']?.toString() ?? '',
+        deskPad: json['desk_pad']?.toString() ?? json['deskPad']?.toString(),
+        deskType: json['desk_type']?.toString() ?? json['deskType']?.toString(),
+        soundRating: _parseDouble(json['sound_rating'] ?? json['soundRating']),
+        feelRating: _parseDouble(json['feel_rating'] ?? json['feelRating']),
+        overallRating: _parseDouble(json['overall_rating'] ?? json['overallRating']),
+        tags: _parseStringList(json['tags']),
+        userId: json['user_id']?.toString() ?? json['userId']?.toString() ?? '',
+        user: json['user'] != null ? User.fromJson(json['user']) : null,
+        media: _parseMediaList(json['media']),
+        createdAt: _parseDateTime(json['created_at'] ?? json['createdAt']),
+        updatedAt: _parseDateTime(json['updated_at'] ?? json['updatedAt']),
+      );
+    } catch (e) {
+      print('Review.fromJson 에러: $e');
+      print('원본 JSON: $json');
+      rethrow;
+    }
+  }
+
+  static double _parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+
+  static List<String> _parseStringList(dynamic value) {
+    if (value == null) return [];
+    if (value is List) {
+      return value.map((e) => e?.toString() ?? '').toList();
+    }
+    return [];
+  }
+
+  static List<ReviewMedia> _parseMediaList(dynamic value) {
+    if (value == null) return [];
+    if (value is List) {
+      return value
+          .map((m) {
+            try {
+              return ReviewMedia.fromJson(m);
+            } catch (e) {
+              print('ReviewMedia 파싱 에러: $e');
+              return null;
+            }
+          })
+          .whereType<ReviewMedia>()
+          .toList();
+    }
+    return [];
+  }
+
+  static DateTime _parseDateTime(dynamic value) {
+    if (value == null) return DateTime.now();
+    if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (e) {
+        print('DateTime 파싱 에러: $e, value: $value');
+        return DateTime.now();
+      }
+    }
+    return DateTime.now();
   }
 
   Map<String, dynamic> toJson() {
@@ -74,7 +128,8 @@ class Review {
       'feelRating': feelRating,
       'overallRating': overallRating,
       'tags': tags,
-      'user': user.toJson(),
+      'userId': userId,
+      'user': user?.toJson(),
       'media': media.map((m) => m.toJson()).toList(),
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),

@@ -71,7 +71,7 @@ class _ReviewDetailScreenState extends State<ReviewDetailScreen> {
                   radius: 24,
                   backgroundColor: Theme.of(context).primaryColor,
                   child: Text(
-                    _review!.user.username[0].toUpperCase(),
+                    (_review!.user?.username ?? '익명')[0].toUpperCase(),
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -85,7 +85,7 @@ class _ReviewDetailScreenState extends State<ReviewDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _review!.user.username,
+                        _review!.user?.username ?? '익명 사용자',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
