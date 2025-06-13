@@ -4,7 +4,7 @@ import '../models/user.dart';
 import '../models/review.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:4000'; // 개발 환경용
+  static const String baseUrl = 'http://10.0.2.2:4000'; // Android 에뮬레이터용
   
   static String? _token;
   

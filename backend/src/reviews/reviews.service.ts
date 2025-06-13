@@ -50,25 +50,11 @@ export class ReviewsService {
       );
     }
 
-    // 리뷰 데이터 가져오기 (사용자 정보와 미디어 포함)
+    // 리뷰 데이터 가져오기 (관계 쿼리 제거하고 기본 테스트)
     const { data: reviews, error } = await this.supabaseService
       .getClient()
       .from('reviews')
-      .select(
-        `
-        *,
-        profiles!reviews_user_id_fkey (
-          id,
-          username,
-          email
-        ),
-        review_media (
-          id,
-          file_url,
-          file_type
-        )
-      `,
-      )
+      .select('*')
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -86,21 +72,7 @@ export class ReviewsService {
     const { data, error } = await this.supabaseService
       .getClient()
       .from('reviews')
-      .select(
-        `
-        *,
-        profiles!reviews_user_id_fkey (
-          id,
-          username,
-          email
-        ),
-        review_media (
-          id,
-          file_url,
-          file_type
-        )
-      `,
-      )
+      .select('*')
       .eq('id', id)
       .single();
 
@@ -115,16 +87,7 @@ export class ReviewsService {
     const { data, error } = await this.supabaseService
       .getClient()
       .from('reviews')
-      .select(
-        `
-        *,
-        review_media (
-          id,
-          file_url,
-          file_type
-        )
-      `,
-      )
+      .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
@@ -141,20 +104,10 @@ export class ReviewsService {
     keycapType?: string;
     tags?: string[];
   }): Promise<any[]> {
-    let supabaseQuery = this.supabaseService.getClient().from('reviews')
-      .select(`
-        *,
-        profiles!reviews_user_id_fkey (
-          id,
-          username,
-          email
-        ),
-        review_media (
-          id,
-          file_url,
-          file_type
-        )
-      `);
+    let supabaseQuery = this.supabaseService
+      .getClient()
+      .from('reviews')
+      .select('*');
 
     if (query.keyboardFrame) {
       supabaseQuery = supabaseQuery.ilike(

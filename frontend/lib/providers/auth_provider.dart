@@ -68,7 +68,7 @@ class AuthProvider with ChangeNotifier {
         password: password,
       );
 
-      // Supabase 응답 구조에 맞게 수정
+      // Supabase 응답 구조에 맞게 수정 (null 체크 강화)
       if (response['session'] != null && response['session']['access_token'] != null) {
         _token = response['session']['access_token'];
         ApiService.setToken(_token!);
@@ -76,9 +76,11 @@ class AuthProvider with ChangeNotifier {
 
       if (response['user'] != null) {
         _user = User.fromJson({
-          'id': response['user']['id'],
-          'username': response['user']['email'], // 임시로 email을 username으로 사용
-          'email': response['user']['email'],
+          'id': response['user']['id'] ?? '',
+          'username': response['user']['email'] ?? email, // 임시로 email을 username으로 사용
+          'email': response['user']['email'] ?? email,
+          'isVerified': false,
+          'createdAt': DateTime.now().toIso8601String(),
         });
       }
       
@@ -106,7 +108,7 @@ class AuthProvider with ChangeNotifier {
         password: password,
       );
 
-      // Supabase 응답 구조에 맞게 수정
+      // Supabase 응답 구조에 맞게 수정 (null 체크 강화)
       if (response['session'] != null && response['session']['access_token'] != null) {
         _token = response['session']['access_token'];
         ApiService.setToken(_token!);
@@ -114,9 +116,11 @@ class AuthProvider with ChangeNotifier {
 
       if (response['user'] != null) {
         _user = User.fromJson({
-          'id': response['user']['id'],
+          'id': response['user']['id'] ?? '',
           'username': username, // 회원가입시 입력한 username 사용
-          'email': response['user']['email'],
+          'email': response['user']['email'] ?? email,
+          'isVerified': false,
+          'createdAt': DateTime.now().toIso8601String(),
         });
       }
       

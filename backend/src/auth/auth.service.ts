@@ -15,28 +15,22 @@ export class AuthService {
   ): Promise<{ user: any; session: any }> {
     const { username, email, password } = createUserDto;
 
+    console.log('회원가입 시도:', { username, email, password: '****' });
+
     // Supabase Auth를 사용하여 사용자 등록
     const { data, error } = await this.supabaseService.signUp(email, password);
 
     if (error) {
+      console.error('Supabase 회원가입 에러:', {
+        message: error.message,
+        status: error.status,
+        error: JSON.stringify(error, null, 2),
+      });
       throw new BadRequestException(`회원가입 실패: ${error.message}`);
     }
 
-    // 사용자 프로필 정보를 별도 테이블에 저장
-    if (data.user) {
-      const { data: profileData, error: profileError } =
-        await this.supabaseService.insert('profiles', {
-          id: data.user.id,
-          username,
-          email,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        });
-
-      if (profileError) {
-        console.error('프로필 생성 오류:', profileError);
-      }
-    }
+    // 임시로 프로필 생성 제거 (데이터베이스 스키마 생성 후 활성화)
+    console.log('회원가입 성공:', data.user?.email);
 
     return { user: data.user, session: data.session };
   }

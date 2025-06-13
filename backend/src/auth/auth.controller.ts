@@ -4,13 +4,11 @@ import {
   Body,
   ValidationPipe,
   Get,
-  UseGuards,
   Request,
   Patch,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../dto/create-user.dto';
-import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {

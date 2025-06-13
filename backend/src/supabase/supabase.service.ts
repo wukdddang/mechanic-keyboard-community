@@ -25,10 +25,29 @@ export class SupabaseService {
 
   // 사용자 인증 관련 메서드들
   async signUp(email: string, password: string) {
+    console.log('Supabase signUp 시도:', { email, password: '****' });
+
     const { data, error } = await this.supabase.auth.signUp({
       email,
       password,
     });
+
+    if (error) {
+      console.error('Supabase signUp 에러 상세:', {
+        message: error.message,
+        status: error.status,
+        name: error.name,
+        cause: error.cause,
+        details: JSON.stringify(error, null, 2),
+      });
+    } else {
+      console.log('Supabase signUp 성공:', {
+        userId: data.user?.id,
+        email: data.user?.email,
+        confirmed: data.user?.email_confirmed_at,
+      });
+    }
+
     return { data, error };
   }
 
