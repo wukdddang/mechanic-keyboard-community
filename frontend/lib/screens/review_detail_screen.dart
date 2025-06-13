@@ -4,14 +4,12 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:intl/intl.dart';
 import '../providers/review_provider.dart';
 import '../models/review.dart';
+import '../widgets/comments_section.dart';
 
 class ReviewDetailScreen extends StatefulWidget {
   final String reviewId;
 
-  const ReviewDetailScreen({
-    super.key,
-    required this.reviewId,
-  });
+  const ReviewDetailScreen({super.key, required this.reviewId});
 
   @override
   State<ReviewDetailScreen> createState() => _ReviewDetailScreenState();
@@ -30,7 +28,7 @@ class _ReviewDetailScreenState extends State<ReviewDetailScreen> {
   Future<void> _loadReview() async {
     final reviewProvider = Provider.of<ReviewProvider>(context, listen: false);
     final review = await reviewProvider.getReview(widget.reviewId);
-    
+
     setState(() {
       _review = review;
       _isLoading = false;
@@ -49,16 +47,12 @@ class _ReviewDetailScreenState extends State<ReviewDetailScreen> {
     if (_review == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('리뷰 상세')),
-        body: const Center(
-          child: Text('리뷰를 불러올 수 없습니다'),
-        ),
+        body: const Center(child: Text('리뷰를 불러올 수 없습니다')),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('리뷰 상세'),
-      ),
+      appBar: AppBar(title: const Text('리뷰 상세')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -86,9 +80,8 @@ class _ReviewDetailScreenState extends State<ReviewDetailScreen> {
                     children: [
                       Text(
                         _review!.user?.username ?? '익명 사용자',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       Text(
                         DateFormat('yyyy년 MM월 dd일').format(_review!.createdAt),
@@ -106,9 +99,9 @@ class _ReviewDetailScreenState extends State<ReviewDetailScreen> {
             // 제목
             Text(
               _review!.title,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
 
@@ -145,12 +138,12 @@ class _ReviewDetailScreenState extends State<ReviewDetailScreen> {
             // 평점
             Text(
               '평점',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            
+
             Row(
               children: [
                 Expanded(child: _buildRatingCard('소리', _review!.soundRating)),
@@ -165,9 +158,9 @@ class _ReviewDetailScreenState extends State<ReviewDetailScreen> {
             // 내용
             Text(
               '리뷰 내용',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Text(
@@ -180,9 +173,9 @@ class _ReviewDetailScreenState extends State<ReviewDetailScreen> {
             if (_review!.tags.isNotEmpty) ...[
               Text(
                 '태그',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -208,7 +201,18 @@ class _ReviewDetailScreenState extends State<ReviewDetailScreen> {
                   );
                 }).toList(),
               ),
+              const SizedBox(height: 32),
             ],
+
+            // 댓글 섹션
+            Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: Colors.grey[300]!, width: 1),
+                ),
+              ),
+              child: CommentsSection(reviewId: widget.reviewId),
+            ),
           ],
         ),
       ),
@@ -234,9 +238,7 @@ class _ReviewDetailScreenState extends State<ReviewDetailScreen> {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -255,29 +257,27 @@ class _ReviewDetailScreenState extends State<ReviewDetailScreen> {
         children: [
           Text(
             label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
           RatingBarIndicator(
             rating: rating,
-            itemBuilder: (context, index) => const Icon(
-              Icons.star,
-              color: Colors.amber,
-            ),
+            itemBuilder: (context, index) =>
+                const Icon(Icons.star, color: Colors.amber),
             itemCount: 5,
             itemSize: 20,
           ),
           const SizedBox(height: 4),
           Text(
             rating.toStringAsFixed(1),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
         ],
       ),
     );
   }
-} 
+}

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/user.dart';
 import '../models/review.dart';
+import '../models/comment.dart';
 
 class ApiService {
   static const String baseUrl = 'http://10.0.2.2:4000'; // Android 에뮬레이터용
@@ -225,6 +226,138 @@ class ApiService {
       return reviewsJson.map((json) => Review.fromJson(json)).toList();
     } else {
       throw Exception('리뷰 검색에 실패했습니다: ${response.body}');
+    }
+  }
+
+  // 댓글 관련
+  static Future<List<Comment>> getComments(String reviewId) async {
+    try {
+      print('💬 댓글 목록 요청: reviewId=$reviewId');
+      
+      final response = await http.get(
+        Uri.parse('$baseUrl/comments/review/$reviewId'),
+        headers: _headers,
+      );
+
+      print('📡 댓글 응답 상태코드: ${response.statusCode}');
+      print('📡 댓글 응답 본문: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print('📊 댓글 파싱된 데이터: $data');
+        
+        if (data['data'] == null) {
+          print('⚠️ 댓글 data 필드가 null입니다');
+          return [];
+        }
+        
+        final List<dynamic> commentsJson = data['data'];
+        print('📋 댓글 개수: ${commentsJson.length}');
+        
+        final comments = <Comment>[];
+        for (int i = 0; i < commentsJson.length; i++) {
+          try {
+            final comment = Comment.fromJson(commentsJson[i]);
+            comments.add(comment);
+            print('✅ 댓글 ${i + 1} 파싱 성공');
+          } catch (e) {
+            print('❌ 댓글 ${i + 1} 파싱 실패: $e');
+            print('❌ 문제있는 댓글 데이터: ${commentsJson[i]}');
+          }
+        }
+        
+        print('✅ 총 ${comments.length}개 댓글 파싱 완료');
+        return comments;
+      } else {
+        throw Exception('댓글 목록을 불러오는데 실패했습니다: ${response.body}');
+      }
+    } catch (e) {
+      print('❌ getComments 에러: $e');
+      rethrow;
+    }
+  }
+
+  static Future<Comment> createComment({
+    required String reviewId,
+    required String content,
+  }) async {
+    try {
+      print('💬 댓글 작성 요청: reviewId=$reviewId, content=$content');
+      
+      final response = await http.post(
+        Uri.parse('$baseUrl/comments'),
+        headers: _headers,
+        body: jsonEncode({
+          'reviewId': reviewId,
+          'content': content,
+        }),
+      );
+
+      print('📡 댓글 작성 응답 상태코드: ${response.statusCode}');
+      print('📡 댓글 작성 응답 본문: ${response.body}');
+
+      if (response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        return Comment.fromJson(data['data']);
+      } else {
+        throw Exception('댓글 작성에 실패했습니다: ${response.body}');
+      }
+    } catch (e) {
+      print('❌ createComment 에러: $e');
+      rethrow;
+    }
+  }
+
+  static Future<Comment> updateComment({
+    required String commentId,
+    required String content,
+  }) async {
+    try {
+      print('✏️ 댓글 수정 요청: commentId=$commentId, content=$content');
+      
+      final response = await http.patch(
+        Uri.parse('$baseUrl/comments/$commentId'),
+        headers: _headers,
+        body: jsonEncode({
+          'content': content,
+        }),
+      );
+
+      print('📡 댓글 수정 응답 상태코드: ${response.statusCode}');
+      print('📡 댓글 수정 응답 본문: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return Comment.fromJson(data['data']);
+      } else {
+        throw Exception('댓글 수정에 실패했습니다: ${response.body}');
+      }
+    } catch (e) {
+      print('❌ updateComment 에러: $e');
+      rethrow;
+    }
+  }
+
+  static Future<void> deleteComment(String commentId) async {
+    try {
+      print('🗑️ 댓글 삭제 요청: commentId=$commentId');
+      
+      final response = await http.delete(
+        Uri.parse('$baseUrl/comments/$commentId'),
+        headers: _headers,
+      );
+
+      print('📡 댓글 삭제 응답 상태코드: ${response.statusCode}');
+      print('📡 댓글 삭제 응답 본문: ${response.body}');
+
+      if (response.statusCode != 200) {
+        throw Exception('댓글 삭제에 실패했습니다: ${response.body}');
+      }
+      
+      print('✅ 댓글 삭제 성공');
+    } catch (e) {
+      print('❌ deleteComment 에러: $e');
+      rethrow;
     }
   }
 } 
