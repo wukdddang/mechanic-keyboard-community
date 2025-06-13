@@ -5,6 +5,7 @@ import '../providers/review_provider.dart';
 import '../widgets/review_card.dart';
 import 'create_review_screen.dart';
 import 'search_screen.dart';
+import 'api_test_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -47,6 +48,13 @@ class _HomeScreenState extends State<HomeScreen> {
             onSelected: (value) async {
               if (value == 'logout') {
                 await Provider.of<AuthProvider>(context, listen: false).logout();
+              } else if (value == 'api_test') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ApiTestScreen(),
+                  ),
+                );
               }
             },
             itemBuilder: (context) => [
@@ -57,6 +65,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     const Icon(Icons.person),
                     const SizedBox(width: 8),
                     Text(Provider.of<AuthProvider>(context, listen: false).user?.username ?? ''),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'api_test',
+                child: Row(
+                  children: [
+                    Icon(Icons.bug_report),
+                    SizedBox(width: 8),
+                    Text('API 테스트'),
                   ],
                 ),
               ),

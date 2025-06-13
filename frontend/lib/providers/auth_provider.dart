@@ -58,20 +58,30 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> login(String username, String password) async {
+  Future<bool> login(String email, String password) async {
     try {
       _isLoading = true;
       notifyListeners();
 
       final response = await ApiService.login(
-        username: username,
+        email: email,
         password: password,
       );
 
-      _token = response['token'];
-      _user = User.fromJson(response['user']);
+      // Supabase 응답 구조에 맞게 수정
+      if (response['session'] != null && response['session']['access_token'] != null) {
+        _token = response['session']['access_token'];
+        ApiService.setToken(_token!);
+      }
+
+      if (response['user'] != null) {
+        _user = User.fromJson({
+          'id': response['user']['id'],
+          'username': response['user']['email'], // 임시로 email을 username으로 사용
+          'email': response['user']['email'],
+        });
+      }
       
-      ApiService.setToken(_token!);
       await _saveUserToStorage();
 
       _isLoading = false;
@@ -96,10 +106,20 @@ class AuthProvider with ChangeNotifier {
         password: password,
       );
 
-      _token = response['token'];
-      _user = User.fromJson(response['user']);
+      // Supabase 응답 구조에 맞게 수정
+      if (response['session'] != null && response['session']['access_token'] != null) {
+        _token = response['session']['access_token'];
+        ApiService.setToken(_token!);
+      }
+
+      if (response['user'] != null) {
+        _user = User.fromJson({
+          'id': response['user']['id'],
+          'username': username, // 회원가입시 입력한 username 사용
+          'email': response['user']['email'],
+        });
+      }
       
-      ApiService.setToken(_token!);
       await _saveUserToStorage();
 
       _isLoading = false;

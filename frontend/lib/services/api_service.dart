@@ -4,7 +4,7 @@ import '../models/user.dart';
 import '../models/review.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:3000'; // 개발 환경용
+  static const String baseUrl = 'http://localhost:4000'; // 개발 환경용
   
   static String? _token;
   
@@ -52,14 +52,14 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> login({
-    required String username,
+    required String email,
     required String password,
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/auth/login'),
       headers: _headers,
       body: jsonEncode({
-        'username': username,
+        'email': email,
         'password': password,
       }),
     );
@@ -68,6 +68,32 @@ class ApiService {
       return jsonDecode(response.body);
     } else {
       throw Exception('로그인에 실패했습니다: ${response.body}');
+    }
+  }
+
+  static Future<void> logout() async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/logout'),
+      headers: _headers,
+    );
+
+    if (response.statusCode == 201) {
+      clearToken();
+    } else {
+      throw Exception('로그아웃에 실패했습니다: ${response.body}');
+    }
+  }
+
+  static Future<Map<String, dynamic>> getCurrentUser() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/auth/me'),
+      headers: _headers,
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('사용자 정보를 불러오는데 실패했습니다: ${response.body}');
     }
   }
 

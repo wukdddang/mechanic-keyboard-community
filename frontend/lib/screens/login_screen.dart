@@ -12,13 +12,13 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -28,14 +28,14 @@ class _LoginScreenState extends State<LoginScreen> {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       
       final success = await authProvider.login(
-        _usernameController.text.trim(),
+        _emailController.text.trim(),
         _passwordController.text,
       );
 
       if (!success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('로그인에 실패했습니다. 사용자명과 비밀번호를 확인해주세요.'),
+            content: Text('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -79,17 +79,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 48),
 
-                // 사용자명 입력
+                // 이메일 입력
                 TextFormField(
-                  controller: _usernameController,
+                  controller: _emailController,
                   decoration: const InputDecoration(
-                    labelText: '사용자명',
-                    prefixIcon: Icon(Icons.person),
+                    labelText: '이메일',
+                    prefixIcon: Icon(Icons.email),
                     border: OutlineInputBorder(),
                   ),
+                  keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return '사용자명을 입력해주세요';
+                      return '이메일을 입력해주세요';
+                    }
+                    if (!value.contains('@')) {
+                      return '올바른 이메일 형식을 입력해주세요';
                     }
                     return null;
                   },

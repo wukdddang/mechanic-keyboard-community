@@ -1,6 +1,16 @@
-import { Controller, Post, Body, ValidationPipe } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  ValidationPipe,
+  Get,
+  UseGuards,
+  Request,
+  Patch,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../dto/create-user.dto';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -12,7 +22,24 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(@Body() body: { username: string; password: string }) {
-    return this.authService.login(body.username, body.password);
+  async login(@Body() body: { email: string; password: string }) {
+    return this.authService.login(body.email, body.password);
+  }
+
+  @Post('logout')
+  async logout() {
+    return this.authService.logout();
+  }
+
+  @Get('me')
+  async getCurrentUser() {
+    return this.authService.getCurrentUser();
+  }
+
+  @Patch('profile')
+  async updateProfile(@Body() updateData: any, @Request() req: any) {
+    // 실제 구현에서는 JWT에서 user ID를 추출해야 합니다
+    const userId = req.user?.id;
+    return this.authService.updateProfile(userId, updateData);
   }
 }
